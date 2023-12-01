@@ -15,6 +15,9 @@ async function loginUser() {
     try {
         await firebase_loginUser(dataStore.registerInfo.email, dataStore.registerInfo.password)
         dataStore.HideAllMenu()
+        setTimeout(() => {
+            window.location.reload()
+        },500)
     }
     catch (error) {
         console.log(error.message)
