@@ -26,7 +26,7 @@ function createUser() {
 
 <script>
 export default {
-    name: "SignUp"
+    name: "SignUp_modal"
 }
 </script>
 

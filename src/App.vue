@@ -42,14 +42,14 @@ async function logOutUser() {
 }
 </script>
 <script>
-import SignUp from "@/views/SignUp.vue"
-import SignIn from "@/views/SignIn.vue"
+import SignUpModal from "@/views/SignUp_modal.vue"
+import SignInModal from "@/views/SignIn_modal.vue"
 
 export default {
   name: "App",
   components: {
-    "signup": SignUp,
-    "signin": SignIn,
+    "SignUp_modal": SignUpModal,
+    "signin_modal": SignInModal,
   }
 }
 </script>
@@ -86,8 +86,8 @@ export default {
         </p>
       </span>
     </div>
-    <signup></signup>
-    <signin></signin>
+    <SignUp_modal></SignUp_modal>
+    <signin_modal></signin_modal>
     <create-account></create-account>
   </header>
 </template>

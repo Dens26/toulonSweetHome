@@ -24,7 +24,7 @@ async function loginUser() {
 
 <script>
 export default {
-    name: "SignIn"
+    name: "SignIn_modal"
 }
 </script>
 
