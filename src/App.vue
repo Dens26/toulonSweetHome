@@ -1,33 +1,40 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useDataStore } from "@/stores/data.js"
-import { firebase_logOutUser, firebase_loadUser } from "@/firebase/firebaseFunctions.js"
+import { getAuth, onAuthStateChanged } from "@firebase/auth"
+import { firebase_logOutUser, firebase_loadUserData } from "@/firebase/firebaseFunctions.js"
 
 const dataStore = useDataStore()
+const auth = getAuth();
 
 onMounted(() => {
-  firebase_loadUser()
-    .then((data) => {
-      if (data) {
-        console.log(data)
-        dataStore.connectionStatus = true
-        dataStore.userAccount.firstName = data.firstName
-        dataStore.userAccount.lastName = data.lastName
-        dataStore.userAccount.birthday = data.birthday
+  const auth = getAuth();
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const data = await firebase_loadUserData(user.uid);
+        if (data) {
+          dataStore.connectionStatus = true;
+          dataStore.userAccount.firstName = data.firstName;
+          dataStore.userAccount.lastName = data.lastName;
+          dataStore.userAccount.birthday = data.birthday;
+        } else {
+          dataStore.connectionStatus = false;
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données utilisateur :", error);
       }
-      else
-        dataStore.connectionStatus = false
-    })
-    .catch((error) => {
-      console.error("Erreur lors de la récupération des données utilisateur :", error)
-    })
-})
+    } else {
+      dataStore.connectionStatus = false;
+    }
+  });
+});
 
 async function logOutUser() {
   try {
     await firebase_logOutUser()
     dataStore.HideAllMenu()
-    window.location.reload()
   }
   catch (error) {
     console.error("Erreur lors de la déconnexion de l'utilisateur :", error);

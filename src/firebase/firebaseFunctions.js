@@ -7,35 +7,24 @@ import { db } from "@/firebase/index.js"
  * Load User data function
  * @returns Return the user data or nothing
  */
-export function firebase_loadUser() {
-    const auth = getAuth();
-    return new Promise((resolve, reject) => {
-        // Auth function
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User found
-                // Firestore function
-                const docRef = doc(db, "users", user.uid)
-                try {
-                    const docSnap = await getDoc(docRef)
-
-                    if (docSnap.exists())
-                        // Data found
-                        resolve(docSnap.data())
-                    else
-                        // Data not found
-                        resolve(null)
-                }
-                catch (error) {
-                    // Error found
-                    reject(error)
-                }
+export function firebase_loadUserData(uid) {
+    return new Promise(async (resolve, reject) => {
+        // Firestore function
+        const docRef = doc(db, "users", uid);
+        try {
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                // User data found
+                resolve(docSnap.data());
+            } else {
+                // User data not found
+                resolve(null);
             }
-            else
-                // User not found
-                resolve(null)
-        })
-    })
+        } catch (error) {
+            // Error found
+            reject(error);
+        }
+    });
 }
 
 /**

@@ -11,7 +11,7 @@ const dataStore = useDataStore()
 function createUser() {
     dataStore.error.registerError = ""
     firebase_createUser(JSON.parse(JSON.stringify(dataStore.registerInfo)))
-    .then((user) => {
+        .then((user) => {
             dataStore.userAccount.uid = user.uid
             dataStore.ShowSignUp(false)
         })
