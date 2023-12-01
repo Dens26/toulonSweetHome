@@ -1,0 +1,120 @@
+@import 'base.css';
+
+button:hover{
+  cursor: pointer;
+}
+/* Menu */
+
+
+/* Formulaire */
+.container {
+  position: fixed;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.overlay {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.1);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.form {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  top: 5%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  margin: 10px auto;
+  padding: 15px;
+  background: var(--color-background-mute);
+  border-radius: 15px;
+  box-shadow: 0 0 5px gray;
+}
+@media screen and (min-width:576px) {
+  .form{
+    width: 450px;
+  }
+}
+
+.separator {
+  padding: 15px;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.form-header button {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+
+h2 {
+  margin: 0 auto;
+  font-weight: 600;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin: 2px 0;
+}
+
+.form-group label {
+  margin-left: 10px;
+}
+
+.form-group input {
+  height: 40px;
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 100%;
+}
+
+.form-group span {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-group span img {
+  width: 30px;
+}
+
+.error-message {
+  color: red;
+}
+
+.submit {
+  align-self: center;
+}
+
+.submit button {
+  height: 50px;
+  width: 200px;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.allowed {
+  cursor: pointer;
+}
+
+.not-allowed {
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none;
+}
