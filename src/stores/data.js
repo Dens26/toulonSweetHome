@@ -1,22 +1,46 @@
 import { defineStore } from 'pinia'
+import { country } from "@/assets/country.js"
+import { firebase_loadData } from "@/firebase/firebaseFunctions.js"
 
 export const useDataStore = defineStore('data', {
   state: () => ({
     // Connection status
     connectionStatus: false,
 
+    // Data
+    countryCodes: country,
+    countryCodePlaceholder: "Votre numéro de portable",
+    reservation: {
+      accommodation_id: "",
+      endDate: "",
+      nbrOfPersons: "",
+      startDate: "",
+      travelerFirstName: "",
+      travelerLastName: "",
+      travelerCountryCode: "",
+      travelerMobile: ""
+    },
+
+
     // User Informations
     userAccount: {
       uid: "",
+      email: "",
       firstName: "",
       lastName: "",
-      birthday: ""
+      countryCode: "",
+      mobile: "",
+      birthday: "",
+      accommodations: []
     },
 
     // Page status
     showMenu: false,
     showSignUp: false,
     showSignIn: false,
+    showAddAccommodation: false,
+    showAccommodations: false,
+    showReservation: false,
 
     // Register informations
     registerInfo: {
@@ -24,7 +48,9 @@ export const useDataStore = defineStore('data', {
       password: "",
       firstName: "",
       lastName: "",
-      birthday: "",
+      countryCode: "",
+      mobile: "",
+      birthday: ""
     },
 
     // Properties status
@@ -33,13 +59,13 @@ export const useDataStore = defineStore('data', {
       passwordValid: false,
       firstNameValid: false,
       lastNameValid: false,
+      mobileValid: false,
       birthdayValid: false
     },
 
     // Error management
     error: {
       emailError: "",
-      confirmEmailError: "",
       passwordLengthError: "",
       passwordSpecialCharacterError: "",
       passwordLowerCaseError: "",
@@ -49,18 +75,33 @@ export const useDataStore = defineStore('data', {
 
       firstNameError: "",
       lastNameError: "",
+      mobileError: "",
       birthdayError: "",
+      addAccommodationError: "",
 
       registerError: ""
+    },
+    message: {
+      addAccommodationMessage: ""
     }
   }),
   actions: {
     // Clear all register and error datas
     clearAllInfo() {
-      for (let key in this.registerInfo)
-        this.registerInfo[key] = ""
+      for (let key in this.registerInfo) {
+        if (key != "countryCode")
+          this.registerInfo[key] = ""
+      }
       for (let key in this.error)
         this.error[key] = ""
+      for (let key in this.formValid)
+        this.formValid[key] = false
+      for (let key in this.message)
+        this.message[key] = ""
+    },
+    ShowMenu(value) {
+      this.showMenu = false
+      this.clearAllInfo()
     },
     // Signup display management
     ShowSignUp(value) {
@@ -74,12 +115,50 @@ export const useDataStore = defineStore('data', {
       this.showMenu = false
       this.clearAllInfo()
     },
-    HideAllMenu(){
+    ShowAddAccommodation(value) {
+      this.showAddAccommodation = value
+      this.showMenu = false
+      this.clearAllInfo()
+    },
+    ShowAccommodations(value) {
+      this.showAccommodations = value
+      this.showMenu = false
+      this.clearAllInfo()
+    },
+    async ShowReservation(value, reservation) {
+      this.showReservation = value
+      if (value) {
+        const user = await firebase_loadData(reservation.uid, "users")
+        if (user) {
+          this.reservation.accommodation_id = reservation.accommodation_id
+          this.reservation.endDate = reservation.endDate
+          this.reservation.nbrOfPersons = reservation.nbrOfPersons
+          this.reservation.startDate = reservation.startDate
+          this.reservation.travelerFirstName = user.firstName
+          this.reservation.travelerLastName = user.lastName
+          this.reservation.travelerCountryCode = user.countryCode
+          this.reservation.travelerMobile = user.mobile
+        }
+      }
+      this.clearAllInfo()
+    },
+    HideAllMenu() {
       this.showSignIn = false
       this.showMenu = false
       this.showSignUp = false
+      this.showAddAccomodation = false
+      this.clearAllInfo()
+    },
+    countryCodeChange(event) {
+      this.registerInfo.countryCode = `+${event.target.value}`
+      if (this.registerInfo.countryCode == "+33")
+        this.countryCodePlaceholder = "XXXXXXXXX"
+      else {
+        this.countryCodePlaceholder = "Votre numéro de portable"
+      }
     }
   },
+
   getters: {
     // Return the firstName first character
     getFirstNameChar() {
@@ -98,7 +177,8 @@ export const useDataStore = defineStore('data', {
     getFormValidForConnection(state) {
       if (!state.formValid.emailValid || !state.formValid.passwordValid)
         return false
-      return true
+      else
+        return true
     },
     // Check the email structure
     emailVerification(state) {
@@ -202,6 +282,29 @@ export const useDataStore = defineStore('data', {
       }
       state.error.birthdayError = ""
       return state.formValid.birthdayValid = true
+    },
+    // Check the mobile structure
+    mobileVerification(state) {
+      if (!state.registerInfo.countryCode) {
+        state.error.mobileError = "Vous devez choisir l'indicatif du pays"
+        return state.formValid.mobileValid = false
+      }
+      else {
+        if (state.registerInfo.countryCode == "+33") {
+          if (state.registerInfo.mobile.length != 9) {
+            state.error.mobileError = "Format attendu : XXXXXXXXX"
+            return state.formValid.mobileValid = false
+          }
+          state.error.mobileError = ""
+          return state.formValid.mobileValid = true
+        }
+        else if (state.registerInfo.mobile.length < 8) {
+          state.error.mobileError = "Le numéro doit contenir au moins 8 chiffre"
+          return state.formValid.mobileValid = false
+        }
+        state.error.mobileError = ""
+        return state.formValid.mobileValid = true
+      }
     }
   }
 })

@@ -13,7 +13,7 @@ For an optimal development experience, consider using the following setup:
 ## Firebase Setup
 
 1. Create a project on [Firebase](https://console.firebase.google.com/).
-2. Set up a Firestore database named "tasks" for your project.
+2. Set up a Firestore database named "users" for your project.
 
    For configuration assistance, refer to the [Firestore documentation](https://cloud.google.com/firestore/docs/create-database-web-mobile-client-library?hl=en).
 

@@ -1,5 +1,5 @@
 // References
-import { getAuth, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "@firebase/auth"
+import { getAuth, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateEmail } from "@firebase/auth"
 import { doc, setDoc, getDoc } from "@firebase/firestore"
 import { db } from "@/firebase/index.js"
 
@@ -7,10 +7,10 @@ import { db } from "@/firebase/index.js"
  * Load User data function
  * @returns Return the user data or nothing
  */
-export function firebase_loadUserData(uid) {
+export function firebase_loadData(uid, collection) {
     return new Promise(async (resolve, reject) => {
         // Firestore function
-        const docRef = doc(db, "users", uid);
+        const docRef = doc(db, collection, uid);
         try {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
@@ -24,7 +24,7 @@ export function firebase_loadUserData(uid) {
             // Error found
             reject(error);
         }
-    });
+    })
 }
 
 /**
@@ -75,12 +75,12 @@ export function firebase_loginUser(email, password) {
  */
 export function firebase_createUser(registerInfo) {
     return new Promise(async (resolve, reject) => {
-        const auth = getAuth();
+        const auth = getAuth()
         try {
             // Auth function to create a new user
             const userCredential = await createUserWithEmailAndPassword(auth, registerInfo.email, registerInfo.password)
             // intern function to create user data 
-            const response = await createUserAccount(userCredential.user.uid, registerInfo.firstName, registerInfo.lastName, registerInfo.birthday)
+            const response = await createUserAccount(userCredential.user.uid, registerInfo.firstName, registerInfo.lastName, registerInfo.countryCode, registerInfo.mobile, registerInfo.birthday)
 
             if (!response.success)
                 // Error pending data user creation
@@ -103,19 +103,75 @@ export function firebase_createUser(registerInfo) {
  * @param {*} birthday - user birthday
  * @returns Return success and message
  */
-async function createUserAccount(uid, firstName, lastName, birthday) {
+async function createUserAccount(uid, firstName, lastName, countryCode, mobile, birthday) {
     try {
         // Firestore function
         await setDoc(doc(db, "users", uid), {
+            accommodation: "",
+            birthday: birthday,
+            countryCode: countryCode,
             firstName: firstName,
+            isAdmin: false,
             lastName: lastName,
-            birthday: birthday
+            mobile: mobile
         });
         // user data created
-        return { success: true, message: "Compte utilisateur créé avec succès." };
+        return { success: true, message: "Compte utilisateur créé avec succès." }
     }
     catch (error) {
         // user data not created
-        return { success: false, message: "Erreur lors de la création du compte utilisateur" + error };
+        return { success: false, message: "Erreur lors de la création du compte utilisateur" + error }
     }
+}
+
+export function firebase_requestToAskNewAccommodation(uid, email, countryCode, mobile) {
+    return new Promise(async (resolve, reject) => {
+        // Firestore function
+        const docRef = doc(db, "requestedAccommodation", uid);
+        try {
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                // request not exist
+                // Firestore function
+                await setDoc(doc(db, "requestedAccommodation", uid), {
+                    uid: uid,
+                    email: email,
+                    countryCode: countryCode,
+                    mobile: mobile,
+                    date: new Date().toLocaleDateString().split('/').reverse().join('-')
+                });
+                resolve({
+                    success: true,
+                    message: "Demande d'ajout d'un nouveau logement éffectuée"
+                })
+            }
+            else {
+                // Request exist
+                resolve({
+                    success: false,
+                    message: "Une demande d'ajout d'un nouveau logement est déjà en cours pour ce compte"
+                })
+            }
+        }
+        catch (error) {
+            // Error found
+            reject({
+                success: false,
+                message: "Votre demande d'ajout d'un nouveau logement a échouée" + error
+            })
+        }
+    })
+}
+
+export function firebase_updateUserAccountEmail(newEmail) {
+    return new Promise(async (resolve, reject) => {
+        const auth = getAuth()
+        updateEmail(auth.currentUser, newEmail).
+            then(() => {
+                resolve(true)
+            })
+            .catch((error) => {
+                reject(false)
+            })
+    })
 }
